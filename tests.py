@@ -1,8 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+from django.conf import settings
+settings.configure(DEBUG=True)
+
 from unittest.case import TestCase
 
+from rest_framework.utils.serializer_helpers import ReturnDict
 from rest_camel.util import camelize, underscorize
 
 
@@ -12,6 +16,19 @@ class UnderscoreToCamelTestCase(TestCase):
         input = {
             "title_display": 1
         }
+        output = {
+            "titleDisplay": 1
+        }
+        result = camelize(input)
+        self.assertEqual(result, output)
+        self.assertIsNot(result, input, "should not change original dict")
+
+    def test_return_dict_under_to_camel_dict(self):
+        stub_serializer = object()
+        input_raw = {
+            "title_display": 1
+        }
+        input = ReturnDict(input_raw, serializer=stub_serializer)
         output = {
             "titleDisplay": 1
         }
@@ -54,6 +71,21 @@ class UnderscoreToCamelTestCase(TestCase):
         }
         self.assertEqual(camelize(input), output)
 
+    def test_return_dict_under_to_camel_nested(self):
+        stub_serializer = object()
+        input_raw = {
+            "title_display": 1,
+            "a_list": [1, "two_three", {"three_four": 5}],
+            "a_tuple": ("one_two", 3)
+        }
+        input = ReturnDict(input_raw, serializer=stub_serializer)
+        output = {
+            "titleDisplay": 1,
+            "aList": [1, "two_three", {"threeFour": 5}],
+            "aTuple": ("one_two", 3)
+        }
+        self.assertEqual(camelize(input), output)
+
     def test_tuples(self):
         input = {
             "multiple_values": (1, 2)
@@ -78,6 +110,19 @@ class CamelToUnderscoreTestCase(TestCase):
         input = {
             "titleDisplay": 1
         }
+        output = {
+            "title_display": 1
+        }
+        result = underscorize(input)
+        self.assertEqual(result, output)
+        self.assertIsNot(result, input, "should not change original dict")
+
+    def test_return_dict_camel_to_under_dict(self):
+        stub_serializer = object()
+        input_raw = {
+            "titleDisplay": 1
+        }
+        input = ReturnDict(input_raw, serializer=stub_serializer)
         output = {
             "title_display": 1
         }
@@ -113,6 +158,21 @@ class CamelToUnderscoreTestCase(TestCase):
             "aList": [1, "two_three", {"threeFour": 5}],
             "aTuple": ("one_two", 3)
         }
+        output = {
+            "title_display": 1,
+            "a_list": [1, "two_three", {"three_four": 5}],
+            "a_tuple": ("one_two", 3)
+        }
+        self.assertEqual(underscorize(input), output)
+
+    def test_return_dict_camel_to_under_nested(self):
+        stub_serializer = object()
+        input_raw = {
+            "titleDisplay": 1,
+            "aList": [1, "two_three", {"threeFour": 5}],
+            "aTuple": ("one_two", 3)
+        }
+        input = ReturnDict(input_raw, serializer=stub_serializer)
         output = {
             "title_display": 1,
             "a_list": [1, "two_three", {"three_four": 5}],

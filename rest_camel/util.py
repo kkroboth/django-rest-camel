@@ -1,5 +1,4 @@
 import re
-from collections import OrderedDict
 
 
 def camelize_key(key, uppercase_first_letter=True):
@@ -57,8 +56,8 @@ def underscore_key(key):
 def camelize(data):
     data_type = type(data)
 
-    if data_type in (dict, OrderedDict):
-        new_dict = data_type()
+    if isinstance(data, dict):
+        new_dict = copy_dict(data)
         for k, v in data.items():
             new_dict[camelize_key(k, False)] = camelize(v)
 
@@ -73,8 +72,8 @@ def camelize(data):
 def underscorize(data):
     data_type = type(data)
 
-    if data_type in (data, dict):
-        new_dict = data_type()
+    if isinstance(data, dict):
+        new_dict = copy_dict(data)
         for key, value in data.items():
             new_dict[underscore_key(key)] = underscorize(value)
         return new_dict
@@ -83,3 +82,18 @@ def underscorize(data):
         return type(data)(underscorize(x) for x in data)
 
     return data
+
+
+def copy_dict(data):
+    """
+    copy() dict data type and clear it afterwards.
+    DRF ReturnDict holds onto a serializer is must be set if initializing a
+    new object. copy() takes care of that.
+
+    :param data: dictionary type
+    :return: copied and cleared dictionary
+    """
+    # Support DRF ReturnDict
+    new_dict = data.copy()
+    new_dict.clear()
+    return new_dict
